@@ -7,12 +7,12 @@ namespace AIPromptOptimizerExtension
     /// <summary>
     /// Interaction logic for ToolWindow1Control.
     /// </summary>
-    public partial class ToolWindow1Control : UserControl
+    public partial class PromptEngineerWindowControl : UserControl
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ToolWindow1Control"/> class.
+        /// Initializes a new instance of the <see cref="PromptEngineerWindowControl"/> class.
         /// </summary>
-        public ToolWindow1Control()
+        public PromptEngineerWindowControl()
         {
             this.InitializeComponent();
         }

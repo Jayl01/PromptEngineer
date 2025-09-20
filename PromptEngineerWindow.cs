@@ -16,19 +16,20 @@ namespace AIPromptOptimizerExtension
     /// </para>
     /// </remarks>
     [Guid("8dbdd9f6-830e-446a-8706-f7ae2cd2ad58")]
-    public class ToolWindow1 : ToolWindowPane
+    public class PromptEngineerWindow : ToolWindowPane
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ToolWindow1"/> class.
+        /// Initializes a new instance of the <see cref="PromptEngineerWindow"/> class.
         /// </summary>
-        public ToolWindow1() : base(null)
+        public PromptEngineerWindow() : base(null)
         {
             this.Caption = "ToolWindow1";
 
             // This is the user control hosted by the tool window; Note that, even if this class implements IDisposable,
             // we are not calling Dispose on this object. This is because ToolWindowPane calls Dispose on
             // the object returned by the Content property.
-            this.Content = new ToolWindow1Control();
+            this.Content = new PromptEngineerWindowControl();
         }
+
     }
 }

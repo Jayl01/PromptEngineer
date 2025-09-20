@@ -12,7 +12,7 @@ namespace AIPromptOptimizerExtension
     /// <summary>
     /// Command handler
     /// </summary>
-    internal sealed class ToolWindow1Command
+    internal sealed class PromptEngineerCommand
     {
         /// <summary>
         /// Command ID.
@@ -30,12 +30,12 @@ namespace AIPromptOptimizerExtension
         private readonly AsyncPackage package;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ToolWindow1Command"/> class.
+        /// Initializes a new instance of the <see cref="PromptEngineerCommand"/> class.
         /// Adds our command handlers for menu (commands must exist in the command table file)
         /// </summary>
         /// <param name="package">Owner package, not null.</param>
         /// <param name="commandService">Command service to add command to, not null.</param>
-        private ToolWindow1Command(AsyncPackage package, OleMenuCommandService commandService)
+        private PromptEngineerCommand(AsyncPackage package, OleMenuCommandService commandService)
         {
             this.package = package ?? throw new ArgumentNullException(nameof(package));
             commandService = commandService ?? throw new ArgumentNullException(nameof(commandService));
@@ -48,7 +48,7 @@ namespace AIPromptOptimizerExtension
         /// <summary>
         /// Gets the instance of the command.
         /// </summary>
-        public static ToolWindow1Command Instance
+        public static PromptEngineerCommand Instance
         {
             get;
             private set;
@@ -76,7 +76,7 @@ namespace AIPromptOptimizerExtension
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync(package.DisposalToken);
 
             OleMenuCommandService commandService = await package.GetServiceAsync((typeof(IMenuCommandService))) as OleMenuCommandService;
-            Instance = new ToolWindow1Command(package, commandService);
+            Instance = new PromptEngineerCommand(package, commandService);
         }
 
         /// <summary>
@@ -88,11 +88,9 @@ namespace AIPromptOptimizerExtension
         {
             this.package.JoinableTaskFactory.RunAsync(async delegate
             {
-                ToolWindowPane window = await this.package.ShowToolWindowAsync(typeof(ToolWindow1), 0, true, this.package.DisposalToken);
+                ToolWindowPane window = await this.package.ShowToolWindowAsync(typeof(PromptEngineerWindow), 0, true, this.package.DisposalToken);
                 if ((null == window) || (null == window.Frame))
-                {
                     throw new NotSupportedException("Cannot create tool window");
-                }
             });
         }
     }
