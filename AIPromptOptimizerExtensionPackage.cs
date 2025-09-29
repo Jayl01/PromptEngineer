@@ -63,6 +63,8 @@ namespace AIPromptOptimizerExtension
                     APIKey = Env.GetString("OPENAI_API_KEY");
 
                 Console.WriteLine(APIKey);
+                if (APIKey == null)
+                    throw new Exception("API Key not found!");
             }
             catch (Exception ex)
             {
