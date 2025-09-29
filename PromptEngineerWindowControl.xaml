@@ -11,8 +11,9 @@
              Name="MyToolWindow">
     <Grid>
         <StackPanel Orientation="Vertical">
-            <TextBlock Margin="10" HorizontalAlignment="Center">ToolWindow1</TextBlock>
-            <Button Content="Click me!" Click="button1_Click" Width="120" Height="80" Name="button1"/>
+            <TextBlock Margin="10" HorizontalAlignment="Center" TextInput="TextBlock_TextInput">Prompty</TextBlock>
+            <TextBox Width="200" Height="auto" TextWrapping="Wrap" AcceptsReturn="True"></TextBox>
+            <Button Width="60" Height="20" Margin="5" Click="OnSubmitPrompt">Submit</Button>
         </StackPanel>
     </Grid>
 </UserControl>
