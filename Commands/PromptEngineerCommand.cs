@@ -1,13 +1,10 @@
-﻿using Microsoft.VisualStudio.Shell;
-using Microsoft.VisualStudio.Shell.Interop;
+﻿using AIPromptOptimizerExtension.Windows.PromptEvalWindow;
+using Microsoft.VisualStudio.Shell;
 using System;
 using System.ComponentModel.Design;
-using System.Globalization;
-using System.Threading;
-using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
-namespace AIPromptOptimizerExtension
+namespace AIPromptOptimizerExtension.Commands
 {
     /// <summary>
     /// Command handler

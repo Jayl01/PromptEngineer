@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace AIPromptOptimizerExtension
+namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
 {
     /// <summary>
     /// This class implements the tool window exposed by this package and hosts a user control.

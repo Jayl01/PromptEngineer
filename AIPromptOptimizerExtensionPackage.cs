@@ -1,8 +1,11 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using AIPromptOptimizerExtension.Commands;
+using AIPromptOptimizerExtension.Windows.PromptEvalWindow;
+using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Task = System.Threading.Tasks.Task;
+using DotNetEnv;
 
 namespace AIPromptOptimizerExtension
 {
@@ -34,6 +37,8 @@ namespace AIPromptOptimizerExtension
         /// </summary>
         public const string PackageGuidString = "abef6eef-b2e4-4ddc-9c1d-3d02ee15fe06";
 
+        public static string APIKey { get; private set; }
+
         #region Package Members
 
         /// <summary>
@@ -49,6 +54,21 @@ namespace AIPromptOptimizerExtension
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             await PromptEngineerCommand.InitializeAsync(this);
+            try
+            {
+                var g = Env.Load();
+
+                APIKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+                if (APIKey == null)
+                    APIKey = Env.GetString("OPENAI_API_KEY");
+
+                Console.WriteLine(APIKey);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Exception encountered!\nMessage: " + ex.Message);
+                return;
+            }
         }
 
         #endregion
