@@ -39,7 +39,7 @@ namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
         /// <param name="e">The event args.</param>
         [SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions", Justification = "Sample code")]
         [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:ElementMustBeginWithUpperCaseLetter", Justification = "Default event handler naming pattern")]
-        private void OnSubmitPrompt(object sender, RoutedEventArgs e)
+        private async void OnSubmitPrompt(object sender, RoutedEventArgs e)
         {
             ChatClient client = new ChatClient(
                 model: "gpt-5-mini",
@@ -47,8 +47,9 @@ namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
             );
 
             string inputPrompt = MainPrompt.Replace("{{userPrompt}}", "userPrompt");
-            ChatCompletion response = client.CompleteChat("This is a prompt");
-            string result = response.Content[0].Text;
+            //ChatCompletion response = client.CompleteChat(inputPrompt);
+            string result = await GeminiAPI.GetResponseAsync(inputPrompt);
+            //string result = response.Content[0].Text;
 
             Console.WriteLine(result);
         }

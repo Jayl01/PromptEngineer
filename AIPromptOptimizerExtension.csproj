@@ -46,6 +46,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AIManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AIPromptOptimizerExtensionPackage.cs" />
     <Compile Include="Windows\PromptEvalWindow\PromptEngineerWindow.cs" />
