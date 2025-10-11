@@ -18,6 +18,7 @@
             <TextBlock Margin="10" HorizontalAlignment="Center">Prompty</TextBlock>
             <TextBox Width="200" Height="auto" TextWrapping="Wrap" AcceptsReturn="True" TextInput="Prompt_Input"></TextBox>
             <Button Width="60" Height="20" Margin="5" Click="OnSubmitPrompt">Submit</Button>
+            <TextBlock Text="{Binding AIResult}"></TextBlock>
         </StackPanel>
     </Grid>
 </UserControl>

@@ -1,8 +1,12 @@
-﻿using OpenAI.Chat;
+﻿using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Threading;
+using OpenAI.Chat;
 using System;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Controls;
+using Newtonsoft.Json;
 
 namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
 {
@@ -14,7 +18,7 @@ namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
         //Verbatim text.
         private const string MainPrompt = @"
             You are Prompty, an expert prompt engineer.
-            A user will use {{userPrompt}} as a prompt.
+            A user will use ""{{userPrompt}}"" as a prompt.
 
             Instructions:
             1. Score the prompt from 0% to 100% based on clarity, conciceness, and contextuality.
@@ -23,9 +27,22 @@ namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
             4. If there is an issue with contextuality, explain where the prompt lacks context.
             5. Praise the good qualities of the prompt.
             6. Explain the benefits of adjusting the input in terms of Token efficiency and generation speed.
+
+            Return a response that strictly adheres to the following JSON format:
+            {{
+                ""score"": ""<score from 0 to 100>"",
+                ""issues"": {{
+                    ""clarity"": ""<explanation of clarity issues or 'None'>"",
+                    ""conciceness"": ""<explanation of conciceness issues or 'None'>"",
+                    ""contextuality"": ""<explanation of contextuality issues or 'None'>""
+                }},
+                ""praise"": ""<praise for the good qualities of the prompt>"",
+                ""benefits"": ""<explanation of benefits of adjusting the input in terms of Token efficiency and generation speed>""
+            }}
             ";
 
         private string userPrompt;
+        public string AIResult = "Hello!";
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PromptEngineerWindowControl"/> class.
@@ -39,19 +56,14 @@ namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
         /// <param name="e">The event args.</param>
         [SuppressMessage("Microsoft.Globalization", "CA1300:SpecifyMessageBoxOptions", Justification = "Sample code")]
         [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:ElementMustBeginWithUpperCaseLetter", Justification = "Default event handler naming pattern")]
-        private async void OnSubmitPrompt(object sender, RoutedEventArgs e)
+        private void OnSubmitPrompt(object sender, RoutedEventArgs e)
         {
-            ChatClient client = new ChatClient(
-                model: "gpt-5-mini",
-                apiKey: ""
-            );
-
-            string inputPrompt = MainPrompt.Replace("{{userPrompt}}", "userPrompt");
-            //ChatCompletion response = client.CompleteChat(inputPrompt);
-            string result = await GeminiAPI.GetResponseAsync(inputPrompt);
-            //string result = response.Content[0].Text;
-
-            Console.WriteLine(result);
+            string inputPrompt = MainPrompt.Replace("{{userPrompt}}", userPrompt);
+            if (userPrompt == null)
+                userPrompt = "This is a prompt";
+            //Joinable task factory was chosen so that VS doesn't lag and can also responsively queue new prompts.
+            string result = GeminiAPI.GetResponse(userPrompt);
+            AIResult = result;
         }
 
         private void Key_Input(object sender, System.Windows.Input.TextCompositionEventArgs e)
@@ -61,7 +73,7 @@ namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
 
         private void Prompt_Input(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
-
+            userPrompt = e.Text;
         }
     }
 }
