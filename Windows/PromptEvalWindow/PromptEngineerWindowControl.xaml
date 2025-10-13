@@ -9,16 +9,38 @@
              mc:Ignorable="d"
              d:DesignHeight="300" d:DesignWidth="300"
              Name="PromptyWindow">
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="300*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <StackPanel Orientation="Vertical">
-            <TextBlock Margin="10" HorizontalAlignment="Center">Prompty</TextBlock>
-            <TextBox Width="200" Height="auto" TextWrapping="Wrap" AcceptsReturn="True" TextInput="Prompt_Input"></TextBox>
-            <Button Width="60" Height="20" Margin="5" Click="OnSubmitPrompt">Submit</Button>
-            <TextBlock Text="{Binding AIResult}"></TextBlock>
-        </StackPanel>
-    </Grid>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Vertical">
+                <TextBlock Margin="10" HorizontalAlignment="Center" Foreground="White">Prompty</TextBlock>
+                <TextBox x:Name="PromptInputText" Width="200" Height="auto" TextWrapping="Wrap" AcceptsReturn="True"></TextBox>
+                <Button Width="60" Height="20" Margin="5" Click="OnSubmitPrompt">Submit</Button>
+
+                <TextBlock x:Name="PromptText" TextWrapping="Wrap" Foreground="White" />
+                <Rectangle Margin="8" Height="1" HorizontalAlignment="Stretch" Fill="Gray"></Rectangle>
+                <TextBlock x:Name="ClarityText" TextWrapping="Wrap" Foreground="White" />
+                <Rectangle Margin="8" Height="1" HorizontalAlignment="Stretch" Fill="Gray"></Rectangle>
+                <TextBlock x:Name="ConcicenessText" TextWrapping="Wrap" Foreground="White" />
+                <Rectangle Margin="8" Height="1" HorizontalAlignment="Stretch" Fill="Gray"></Rectangle>
+                <TextBlock x:Name="ContextualityText" TextWrapping="Wrap" Foreground="White" />
+                <Rectangle Margin="8" Height="1" HorizontalAlignment="Stretch" Fill="Gray"></Rectangle>
+                <TextBlock x:Name="PraiseText" TextWrapping="Wrap" Foreground="White" />
+                <Rectangle Margin="8" Height="1" HorizontalAlignment="Stretch" Fill="Gray"></Rectangle>
+                <TextBlock x:Name="BenefitsText" TextWrapping="Wrap" Foreground="White" />
+                <Path Stroke="White" StrokeThickness="4">
+                    <Path.Data>
+                        <PathGeometry>
+                            <PathFigure StartPoint="10,10">
+                                <ArcSegment Size="20, 20" IsLargeArc="True" Point="10.1, 10"></ArcSegment>
+                            </PathFigure>
+                        </PathGeometry>
+                    </Path.Data>
+                </Path>
+            </StackPanel>
+        </Grid>
+    </ScrollViewer>
 </UserControl>

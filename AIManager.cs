@@ -11,12 +11,46 @@ using System.Reflection;
 
 namespace AIPromptOptimizerExtension
 {
+    /// <summary>
+    /// Represents the returned gemini structure.
+    /// </summary>
+    public class GeminiPromptEntry
+    {
+        public string type = "Object";
+        public ExpectedProperties properties = new ExpectedProperties();
+
+        public class ExpectedProperties
+        {
+            public ObjectDesriptor score = new ObjectDesriptor("integer");
+            public ObjectDesriptor clarityScore = new ObjectDesriptor("integer");
+            public ObjectDesriptor concicenessScore = new ObjectDesriptor("integer");
+            public ObjectDesriptor contextualityScore = new ObjectDesriptor("integer");
+            public ObjectDesriptor clarityExplanation = new ObjectDesriptor("string");
+            public ObjectDesriptor concicenessExplanation = new ObjectDesriptor("string");
+            public ObjectDesriptor contextualityExplanation = new ObjectDesriptor("string");
+            public ObjectDesriptor benefits = new ObjectDesriptor("string");
+            public ObjectDesriptor praise = new ObjectDesriptor("string");
+        }
+
+        public class ObjectDesriptor
+        {
+            public string type;
+
+            public ObjectDesriptor(string type)
+            {
+                this.type = type;
+            }
+        }
+    }
+
     public class GeminiResponse
     {
         public List<Candidate> candidates { get; set; }
         public UsageMetadata usageMetadata { get; set; }
         public string modelVersion { get; set; }
         public string responseId { get; set; }
+
+        public AnalysisResults ParseResponse() => JsonConvert.DeserializeObject<AnalysisResults>(candidates[0].content.parts[0].text);
 
         public class Candidate
         {
@@ -52,42 +86,22 @@ namespace AIPromptOptimizerExtension
         }
     }
 
-
-    /// <summary>
-    /// Represents the returned gemini structure.
-    /// </summary>
-    public class GeminiPromptEntry
+    public class AnalysisResults
     {
-        public string type = "Object";
-        public ExpectedProperties properties = new ExpectedProperties();
-
-        public class ExpectedProperties
-        {
-            public ObjectDesriptor score = new ObjectDesriptor("integer");
-            public ObjectDesriptor clarityScore = new ObjectDesriptor("integer");
-            public ObjectDesriptor concicenessScore = new ObjectDesriptor("integer");
-            public ObjectDesriptor contextualityScore = new ObjectDesriptor("integer");
-            public ObjectDesriptor clarityExplanation = new ObjectDesriptor("string");
-            public ObjectDesriptor concicenessExplanation = new ObjectDesriptor("string");
-            public ObjectDesriptor contextualityExplanation = new ObjectDesriptor("string");
-            public ObjectDesriptor benefits = new ObjectDesriptor("string");
-            public ObjectDesriptor praise = new ObjectDesriptor("string");
-        }
-
-        public class ObjectDesriptor
-        {
-            public string type;
-
-            public ObjectDesriptor(string type)
-            {
-                this.type = type;
-            }
-        }
+        public string benefits { get; set; }
+        public string clarityExplanation { get; set; }
+        public int clarityScore { get; set; }
+        public string concicenessExplanation { get; set; }
+        public int concicenessScore { get; set; }
+        public string contextualityExplanation { get; set; }
+        public int contextualityScore { get; set; }
+        public string praise { get; set; }
+        public int score { get; set; }
     }
 
     public class GeminiAPI
     {
-        public static string GeminiAPIKey { get => ""; }
+        public static string GeminiAPIKey { get => AIPromptOptimizerExtensionPackage.APIKey[(byte)AIPromptOptimizerExtensionPackage.Keys.Gemini]; }
         private static readonly HttpClient client = new HttpClient();
 
         private const string SystemPretensePrompt = @"
@@ -103,48 +117,7 @@ namespace AIPromptOptimizerExtension
             6. Explain the benefits of adjusting the input in terms of Token efficiency and generation speed.
             ";
 
-        
-
-        public class GenerationConfig
-        {
-            public string responseMimeType { get; set; }
-            public ResponseSchema responseSchema { get; set; }
-        }
-
-        public class Ingredients
-        {
-            public string type { get; set; }
-            public Items items { get; set; }
-        }
-
-        public class Items
-        {
-            public string type { get; set; }
-            public Properties properties { get; set; }
-            public List<string> propertyOrdering { get; set; }
-        }
-
-        public class Properties
-        {
-            public RecipeName recipeName { get; set; }
-            public Ingredients ingredients { get; set; }
-        }
-
-        public class RecipeName
-        {
-            public string type { get; set; }
-        }
-
-        public class ResponseSchema
-        {
-            public string type { get; set; }
-            public Items items { get; set; }
-        }
-
-        public class GeminiResponse
-        {
-            public GenerationConfig generationConfig { get; set; }
-        }
+      
 
         private static async Task<string> GetResponseAsync(string prompt)
         {
@@ -173,23 +146,8 @@ namespace AIPromptOptimizerExtension
                     responseMimeType = "application/json",
                     responseSchema = new
                     {
-                        type = "ARRAY",
-                        items = new
-                        {
-                            type = "OBJECT",
-                            properties = new
-                            {
-                                score = new { type = "integer" },
-                                clarityScore = new { type = "integer" },
-                                concicenessScore = new { type = "integer" },
-                                contextualityScore = new { type = "integer" },
-                                clarityExplanation = new { type = "string" },
-                                concicenessExplanation = new { type = "string" },
-                                contextualityExplanation = new { type = "string" },
-                                benefits = new { type = "string" },
-                                praise = new { type = "string" }
-                            }
-                        }
+                        type = "OBJECT",
+                        properties = new GeminiPromptEntry.ExpectedProperties()
                     }
                 }
             };
@@ -210,18 +168,18 @@ namespace AIPromptOptimizerExtension
         /// </summary>
         /// <param name="prompt"></param>
         /// <returns>The </returns>
-        public static string GetResponse(string prompt)
+        public static AnalysisResults GetResponse(string prompt)
         {
             try
             {
                 string result = ThreadHelper.JoinableTaskFactory.Run(async () => await GetResponseAsync(prompt));
-                GeminiResponse returnedContent = JsonConvert.DeserializeObject(result) as GeminiResponse;
-                return "";
+                GeminiResponse returnedContent = JsonConvert.DeserializeObject<GeminiResponse>(result);
+                return returnedContent.ParseResponse();
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-                return e.Message;
+                return null;
             }
         }
     }

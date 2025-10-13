@@ -37,7 +37,12 @@ namespace AIPromptOptimizerExtension
         /// </summary>
         public const string PackageGuidString = "abef6eef-b2e4-4ddc-9c1d-3d02ee15fe06";
 
-        public static string APIKey { get; private set; }
+        public enum Keys
+        {
+            OpenAI,
+            Gemini
+        }
+        public static string[] APIKey { get; private set; }
 
         #region Package Members
 
@@ -50,18 +55,18 @@ namespace AIPromptOptimizerExtension
         /// <returns>A task representing the async work of package initialization, or an already completed task if there is none. Do not return null from this method.</returns>
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
+            Env.Load();
+
+            APIKey = new string[2];
+            APIKey[(byte)Keys.OpenAI] = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
+            APIKey[(byte)Keys.Gemini] = Environment.GetEnvironmentVariable("GEMINI_API_KEY");
+
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
             await PromptEngineerCommand.InitializeAsync(this);
             try
             {
-                var g = Env.Load();
-
-                APIKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
-                if (APIKey == null)
-                    APIKey = Env.GetString("OPENAI_API_KEY");
-
                 Console.WriteLine(APIKey);
                 if (APIKey == null)
                     throw new Exception("API Key not found!");

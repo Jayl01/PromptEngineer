@@ -1,12 +1,13 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using Microsoft.VisualStudio.RpcContracts.Notifications;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
+using Newtonsoft.Json;
 using OpenAI.Chat;
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Windows;
 using System.Windows.Controls;
-using Newtonsoft.Json;
 
 namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
 {
@@ -17,7 +18,7 @@ namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
     {
         //Verbatim text.
         private const string MainPrompt = @"
-            You are Prompty, an expert prompt engineer.
+            You are an expert prompt engineer called Prompty.
             A user will use ""{{userPrompt}}"" as a prompt.
 
             Instructions:
@@ -27,27 +28,20 @@ namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
             4. If there is an issue with contextuality, explain where the prompt lacks context.
             5. Praise the good qualities of the prompt.
             6. Explain the benefits of adjusting the input in terms of Token efficiency and generation speed.
+            7. Identify the style of prompting that would work best for the use-case. Examples of styles of prompting are: Iterative Prompting, Few-shot prompting, Tree of Thoughts prompting, etc.
 
-            Return a response that strictly adheres to the following JSON format:
-            {{
-                ""score"": ""<score from 0 to 100>"",
-                ""issues"": {{
-                    ""clarity"": ""<explanation of clarity issues or 'None'>"",
-                    ""conciceness"": ""<explanation of conciceness issues or 'None'>"",
-                    ""contextuality"": ""<explanation of contextuality issues or 'None'>""
-                }},
-                ""praise"": ""<praise for the good qualities of the prompt>"",
-                ""benefits"": ""<explanation of benefits of adjusting the input in terms of Token efficiency and generation speed>""
-            }}
+            Use less than 80 tokens.
             ";
 
         private string userPrompt;
-        public string AIResult = "Hello!";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="PromptEngineerWindowControl"/> class.
         /// </summary>
-        public PromptEngineerWindowControl() => InitializeComponent();
+        public PromptEngineerWindowControl()
+        {
+            InitializeComponent();
+            this.DataContext = this;
+        }
 
         /// <summary>
         /// Handles click on the button by displaying a message box.
@@ -59,21 +53,28 @@ namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
         private void OnSubmitPrompt(object sender, RoutedEventArgs e)
         {
             string inputPrompt = MainPrompt.Replace("{{userPrompt}}", userPrompt);
+            userPrompt = PromptInputText.Text;
             if (userPrompt == null)
                 userPrompt = "This is a prompt";
             //Joinable task factory was chosen so that VS doesn't lag and can also responsively queue new prompts.
-            string result = GeminiAPI.GetResponse(userPrompt);
-            AIResult = result;
+            AnalysisResults result = GeminiAPI.GetResponse(userPrompt);
+            UpdateExistingElements(userPrompt, result);
         }
 
-        private void Key_Input(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        public void UpdateExistingElements(string prompt, AnalysisResults analysisResults)
         {
-            userPrompt = e.Text;
-        }
+            if (analysisResults == null)
+            {
+                ClarityText.Text = "An error has occured.";
+                return;
+            }
 
-        private void Prompt_Input(object sender, System.Windows.Input.TextCompositionEventArgs e)
-        {
-            userPrompt = e.Text;
+            PromptText.Text = prompt;
+            ClarityText.Text = "Clarity: " + analysisResults.clarityExplanation;
+            ConcicenessText.Text = "Conciceness: " + analysisResults.concicenessExplanation;
+            ContextualityText.Text = "Contextuality: " + analysisResults.contextualityExplanation;
+            PraiseText.Text = "Praise: " + analysisResults.praise;
+            BenefitsText.Text = "Benefits: " + analysisResults.benefits;
         }
     }
 }
