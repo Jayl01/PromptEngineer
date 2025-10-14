@@ -1,13 +1,11 @@
 ﻿using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Threading;
 using Newtonsoft.Json;
-using Sprache;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Reflection;
 
 namespace AIPromptOptimizerExtension
 {
@@ -109,15 +107,20 @@ namespace AIPromptOptimizerExtension
             Users will provide you their prompts.
 
             Instructions:
-            1. Score the prompt from 0% to 100% based on clarity, conciceness, and contextuality.
+            1. Score the prompt from 0% to 100% based on clarity, conciseness, and contextuality.
             2. If there is an issue with clarity, explain the parts of the prompt that are not clear.
             3. If there is an issue with conciceness, explain where the prompt is not concise.
             4. If there is an issue with contextuality, explain where the prompt lacks context.
             5. Praise the good qualities of the prompt.
             6. Explain the benefits of adjusting the input in terms of Token efficiency and generation speed.
-            ";
+            7. Identify the style of prompting that would work best for the use-case. Examples of styles of prompting are: Iterative Prompting, Few-shot prompting, Tree of Thoughts prompting, etc.
+            
+            Think step by step, but only keep a minimum draft for each thinking step, with 5 words at most.
 
-      
+            Use less than {0} tokens.
+        ";
+
+
 
         private static async Task<string> PromptAsync(string prompt)
         {
@@ -129,7 +132,8 @@ namespace AIPromptOptimizerExtension
             {
                 system_instruction = new        //For some reason, system_instruction stucture is different from prompt structure.
                 {
-                    parts = new { text = SystemPretensePrompt }
+                    //Prompt character length is a lazy way to perform token budget awareness, but it helps!
+                    parts = new { text = SystemPretensePrompt.Replace("{0}", (1000 + (prompt.Length / 5)).ToString()) }
                 },
                 contents = new[]
                 {
@@ -141,8 +145,8 @@ namespace AIPromptOptimizerExtension
                         }
                     }
                 },
-               generationConfig = new
-               {
+                generationConfig = new
+                {
                     responseMimeType = "application/json",
                     responseSchema = new
                     {
