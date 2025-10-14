@@ -119,7 +119,7 @@ namespace AIPromptOptimizerExtension
 
       
 
-        private static async Task<string> GetResponseAsync(string prompt)
+        private static async Task<string> PromptAsync(string prompt)
         {
             if (!client.DefaultRequestHeaders.Contains("x-goog-api-key"))
                 client.DefaultRequestHeaders.Add("x-goog-api-key", GeminiAPIKey);
@@ -164,15 +164,35 @@ namespace AIPromptOptimizerExtension
         }
 
         /// <summary>
-        /// Performs an asynchronous Gemini API call.
+        /// Performs a Gemini API call.
         /// </summary>
-        /// <param name="prompt"></param>
-        /// <returns>The </returns>
+        /// <param name="prompt">The prompt to request from Gemini.</param>
+        /// <returns>An object holding all data on the return response.</returns>
         public static AnalysisResults GetResponse(string prompt)
         {
             try
             {
-                string result = ThreadHelper.JoinableTaskFactory.Run(async () => await GetResponseAsync(prompt));
+                string result = ThreadHelper.JoinableTaskFactory.Run(async () => await PromptAsync(prompt));
+                GeminiResponse returnedContent = JsonConvert.DeserializeObject<GeminiResponse>(result);
+                return returnedContent.ParseResponse();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Performs an asynchronous Gemini API call.
+        /// </summary>
+        /// <param name="prompt">The prompt to request from Gemini.</param>
+        /// <returns>An object holding all data on the return response.</returns>
+        public async static Task<AnalysisResults> GetResponseAsync(string prompt)
+        {
+            try
+            {
+                string result = await PromptAsync(prompt);
                 GeminiResponse returnedContent = JsonConvert.DeserializeObject<GeminiResponse>(result);
                 return returnedContent.ParseResponse();
             }

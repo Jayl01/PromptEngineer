@@ -6,6 +6,8 @@ using OpenAI.Chat;
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection.Metadata;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -53,22 +55,36 @@ namespace AIPromptOptimizerExtension.Windows.PromptEvalWindow
         private void OnSubmitPrompt(object sender, RoutedEventArgs e)
         {
             string inputPrompt = MainPrompt.Replace("{{userPrompt}}", userPrompt);
+            if (PromptInputText.Text == userPrompt)
+                return;
+
             userPrompt = PromptInputText.Text;
             if (userPrompt == null)
                 userPrompt = "This is a prompt";
+
             //Joinable task factory was chosen so that VS doesn't lag and can also responsively queue new prompts.
-            AnalysisResults result = GeminiAPI.GetResponse(userPrompt);
-            UpdateExistingElements(userPrompt, result);
+            ReturnEvaluation(userPrompt);       //runs this operation in another thread.
         }
 
-        public void UpdateExistingElements(string prompt, AnalysisResults analysisResults)
+        /// <summary>
+        /// Will call Gemini with the input prompt. Run in asynchronous conditions to keep the UI running!
+        /// </summary>
+        /// <param name="prompt">The prompt to evaluate.</param>
+        public async Task ReturnEvaluation(string prompt)
         {
+            AnalysisResults analysisResults = await GeminiAPI.GetResponseAsync(userPrompt);
             if (analysisResults == null)
             {
                 ClarityText.Text = "An error has occured.";
                 return;
             }
 
+            //Dispatcher.Invoke(() => UpdateUI(prompt, analysisResults));
+            UpdateUI(prompt, analysisResults);
+        }
+
+        public void UpdateUI(string prompt, AnalysisResults analysisResults)
+        {
             PromptText.Text = prompt;
             ClarityText.Text = "Clarity: " + analysisResults.clarityExplanation;
             ConcicenessText.Text = "Conciceness: " + analysisResults.concicenessExplanation;
